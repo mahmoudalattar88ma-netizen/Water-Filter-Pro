@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0868b5">
+<title>متابع فلتر المياه</title>
+<style>
+:root{--blue:#0868b5;--navy:#084b86;--bg:#f2f7fb;--green:#168653;--orange:#d98500;--red:#d92d36;--muted:#63788b;--card:#fff;--line:#dce7ef}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:#16324b}body.dark{--bg:#101b27;--card:#182838;--line:#2b4052;--muted:#afbfcc;color:#edf5fb}
+header{background:linear-gradient(135deg,var(--blue),var(--navy));color:#fff;padding:20px 16px 25px;border-radius:0 0 24px 24px}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:10px}h1{font-size:22px;margin:0}header p{font-size:12px;margin:8px 0 0;opacity:.9}
+main{max-width:760px;margin:auto;padding:14px 13px 90px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:-10px}
+.stat,.card,.filter-card,.stage-card,.list-item{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 3px 12px #153c5b0b}
+.stat{text-align:center;padding:12px 4px}.stat b{display:block;font-size:24px}.stat span{font-size:11px;color:var(--muted)}
+.card{padding:15px;margin-top:13px}.card h2{font-size:17px;margin:0 0 12px}.muted{color:var(--muted);font-size:12px}.filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.filter-card{padding:14px;text-align:right;color:inherit;width:100%;font:inherit;cursor:pointer}.filter-card strong{display:block;font-size:16px;margin-bottom:5px}.filter-card .emoji{font-size:26px;float:left}.filter-card small{color:var(--muted)}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:11px;padding:11px 13px;background:var(--blue);color:#fff;font-weight:bold}.btn-secondary{background:#e7f1f9;color:var(--navy)}.btn-danger{background:#fff0f0;color:#b4232d}.btn-green{background:#e8f7ee;color:#116b42}.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn-row button{flex:1;min-width:100px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;justify-content:space-around;gap:3px;padding:8px 5px calc(8px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line)}nav button{background:transparent;color:var(--muted);padding:8px 4px;font-size:11px;flex:1}nav button.active{background:#e4f2fc;color:var(--navy)}
+.hidden{display:none!important}.page-title{display:flex;align-items:center;gap:9px;margin:5px 0 12px}.page-title button{padding:7px 11px}.stage-list{display:grid;gap:10px}.stage-card{padding:12px;display:grid;grid-template-columns:54px 1fr;gap:10px;align-items:center}.stage-img{width:50px;height:72px;border-radius:9px;background:#eaf2f8;display:flex;align-items:center;justify-content:center;color:#47799c;font-size:28px;overflow:hidden}.stage-img img{width:100%;height:100%;object-fit:contain}.stage-photo{width:100%;max-height:190px;object-fit:contain;border-radius:12px;background:#eef6fc;border:1px solid var(--line);display:block;margin:8px 0}.photo-preview{width:100%;max-height:150px;object-fit:contain;border-radius:12px;background:#eef6fc;border:1px solid var(--line);display:none;margin-top:8px}.stage-title{font-weight:bold;font-size:14px}.stage-meta{font-size:12px;color:var(--muted);margin-top:5px}.pill{display:inline-block;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:bold;margin-top:6px}.ok{background:#e4f6eb;color:#137547}.soon{background:#fff1d6;color:#9a5b00}.late{background:#ffe5e6;color:#b4232d}.field{display:grid;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted)}.field input,.field select,.field textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:inherit}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.line{height:1px;background:var(--line);margin:12px 0}.empty{text-align:center;color:var(--muted);padding:22px 8px}.report{display:grid;grid-template-columns:1fr 1fr;gap:9px}.report .stat{border-radius:13px}.toast{position:fixed;top:12px;left:12px;right:12px;background:#173d5d;color:#fff;padding:12px;border-radius:12px;z-index:20;text-align:center;display:none}
+@media(max-width:370px){.filter-grid,.grid2{grid-template-columns:1fr}.stage-card{grid-template-columns:44px 1fr}.stage-img{width:42px;height:62px}}
+</style>
+</head>
+<body>
+<header><div class="headrow"><h1>💧 متابع فلتر المياه</h1><button class="btn-secondary" onclick="toggleDark()" style="padding:8px 10px">◐</button></div><p>صيانة منظمة، تنبيهات في موعدها، وسجل كامل لفلاترك</p></header>
+<main>
+<section id="homePage">
+ <div class="summary">
+  <div class="stat"><b id="countOk">0</b><span>شمعات سليمة</span></div>
+  <div class="stat"><b id="countSoon">0</b><span>قربت تنتهي</span></div>
+  <div class="stat"><b id="countLate">0</b><span>متأخرة</span></div>
+ </div>
+ <div class="card"><h2>فلاتري</h2><div id="filterCards" class="filter-grid"></div><div class="btn-row"><button onclick="showAddFilter()">＋ إضافة فلتر</button><button class="btn-secondary" onclick="openPage('alertsPage')">🔔 التنبيهات</button></div></div>
+ <div class="card"><h2>ملخص الصيانة</h2><div class="report"><div class="stat"><b id="monthCost">0</b><span>مصروفات الشهر (ج.م)</span></div><div class="stat"><b id="yearCost">0</b><span>مصروفات السنة (ج.م)</span></div></div><p class="muted">التكلفة محسوبة من عمليات الصيانة المسجلة داخل التطبيق.</p></div>
+ <div class="card"><h2>اختصارات</h2><div class="btn-row"><button class="btn-secondary" onclick="openPage('expensesPage')">💰 المصاريف</button><button class="btn-secondary" onclick="openPage('historyPage')">📋 سجل الصيانة</button><button class="btn-secondary" onclick="openPage('toolsPage')">🧰 أدوات ونسخ احتياطي</button></div></div>
+</section>
+
+<section id="filterPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage('homePage')">رجوع</button><h2 id="filterHeading" style="margin:0;font-size:18px">تفاصيل الفلتر</h2></div>
+ <div id="filterSummary" class="card"></div><div class="card"><b>📸 صور الشمعات</b><p class="muted">لكل مرحلة صورة توضيحية، وتقدر تضيف صورة الشمعة اللي اشتريتها بنفسك؛ صور الشمعات المستبدلة بتفضل محفوظة في سجلها.</p></div><div id="stageList" class="stage-list"></div>
+ <div class="card"><h2>إدارة الفلتر</h2><div class="btn-row"><button onclick="editFilter()">تعديل بيانات الفلتر</button><button class="btn-secondary" onclick="logFilterService()">تسجيل صيانة</button><button class="btn-danger" onclick="deleteFilter()">حذف الفلتر</button></div></div>
+</section>
+
+<section id="filterFormPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage(currentFilterId?'filterPage':'homePage')">رجوع</button><h2 id="filterFormTitle" style="margin:0;font-size:18px">إضافة فلتر</h2></div>
+ <div class="card"><form id="filterForm">
+  <div class="field"><label>اسم الفلتر أو مكانه</label><input id="fName" required maxlength="60" placeholder="مثال: فلتر المطبخ"></div>
+  <div class="field"><label>نوع الفلتر</label><select id="fType"><option value="7">7 مراحل</option><option value="5">5 مراحل</option></select></div>
+  <div class="field"><label>اسم المحل أو الفني (اختياري)</label><input id="fTechnician" maxlength="80"></div>
+  <div class="field"><label>رقم التواصل (اختياري)</label><input id="fPhone" type="tel" maxlength="30"></div>
+  <button type="submit" style="width:100%">حفظ الفلتر</button>
+ </form></div>
+</section>
+
+<section id="stageFormPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage('filterPage')">رجوع</button><h2 style="margin:0;font-size:18px">تعديل بيانات الشمعة</h2></div>
+ <div class="card"><form id="stageForm">
+  <div class="field"><label>اسم الشمعة</label><input id="sName" required maxlength="80"></div>
+  <div class="grid2"><div class="field"><label>تاريخ الشراء</label><input id="sPurchaseDate" type="date"></div><div class="field"><label>تاريخ التركيب</label><input id="sInstall" type="date" required></div></div>
+  <div class="grid2"><div class="field"><label>نوع / موديل الشمعة</label><input id="sModel" maxlength="80" placeholder="مثال: كربون تايواني"></div><div class="field"><label>الشركة / الماركة</label><input id="sBrand" maxlength="80" placeholder="اسم الشركة"></div></div>
+  <div class="grid2"><div class="field"><label>سعر الشراء (جنيه)</label><input id="sPrice" type="number" min="0" step="0.01" value="0"></div><div class="field"><label>تكلفة التركيب (جنيه)</label><input id="sLabor" type="number" min="0" step="0.01" value="0"></div></div>
+  <div class="grid2"><div class="field"><label>المحل / المورد</label><input id="sSupplier" maxlength="100" placeholder="اسم المحل"></div><div class="field"><label>الفني اللي ركّبها</label><input id="sInstaller" maxlength="80" placeholder="اسم الفني أو أنا"></div></div>
+  <div class="grid2"><div class="field"><label>مدة الضمان بالشهور</label><input id="sWarranty" type="number" min="0" max="120" value="0"></div><div class="field"><label>العمر الافتراضي بالشهور</label><input id="sDuration" type="number" min="1" max="120" required></div></div>
+  <div class="field"><label>صورة الشمعة الفعلية (اختياري - صوّرها أو اختارها من المعرض)</label><input id="sPhoto" type="file" accept="image/*" capture="environment"><img id="sPhotoPreview" class="photo-preview" alt="معاينة صورة الشمعة"><small class="muted">الصورة هتتحفظ مع سجل الشمعة على الجهاز، وهنحتفظ بصورة كل شمعة قديمة في الأرشيف عند الاستبدال.</small></div>
+  <div class="field"><label>ملاحظات (اختياري)</label><textarea id="sNotes" rows="2" maxlength="500"></textarea></div>
+  <button type="submit" style="width:100%">حفظ وتحديث المواعيد</button>
+ </form></div>
+</section>
+
+<section id="alertsPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage('homePage')">رجوع</button><h2 style="margin:0;font-size:18px">التنبيهات</h2></div>
+ <div class="card"><h2>إعدادات الإشعارات</h2><label style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="notifyToggle" checked onchange="toggleNotifications(this.checked)"> تفعيل إشعارات تغيير الشمعات</label><p class="muted">تذكير قبل الموعد بـ7 أيام ويومين، وفي يوم الاستحقاق، وتنبيه بعد الموعد. قد يحتاج هاتفك إلى السماح بالإشعارات والتنبيهات الدقيقة من إعدادات أندرويد.</p><div class="btn-row"><button onclick="testNotification()">تجربة الإشعار</button><button class="btn-secondary" onclick="openExactAlarmSettings()">إعدادات دقة التنبيه</button></div></div>
+ <div class="card"><h2>المواعيد القادمة</h2><div id="alertsList"></div></div>
+</section>
+
+<section id="expensesPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage('homePage')">رجوع</button><h2 style="margin:0;font-size:18px">المصاريف</h2></div>
+ <div class="card"><h2>إضافة مصروف</h2><form id="expenseForm"><div class="field"><label>وصف المصروف</label><input id="eDesc" required maxlength="100" placeholder="مثال: طقم شمعات"></div><div class="grid2"><div class="field"><label>المبلغ (جنيه)</label><input id="eAmount" type="number" min="0.01" step="0.01" required></div><div class="field"><label>التاريخ</label><input id="eDate" type="date" required></div></div><div class="field"><label>الفلتر</label><select id="eFilter"></select></div><button type="submit" style="width:100%">تسجيل المصروف</button></form></div>
+ <div class="card"><h2>سجل المصروفات</h2><div id="expensesList"></div></div>
+</section>
+
+<section id="historyPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage('homePage')">رجوع</button><h2 style="margin:0;font-size:18px">سجل الصيانة</h2></div>
+ <div class="card"><div id="historyList"></div></div>
+</section>
+
+<section id="faultsPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage('homePage')">رجوع</button><h2 style="margin:0;font-size:18px">دليل الأعطال</h2></div>
+ <div id="faultsList"></div>
+</section>
+
+<section id="toolsPage" class="hidden">
+ <div class="page-title"><button class="btn-secondary" onclick="openPage('homePage')">رجوع</button><h2 style="margin:0;font-size:18px">الأدوات والإعدادات</h2></div>
+ <div class="card"><h2>النسخ الاحتياطي</h2><p class="muted">احفظ نسخة JSON من الفلاتر والشمعات والمصاريف والسجل، واسترجعها عند الحاجة. احتفظ بالملف في مكان آمن.</p><div class="btn-row"><button onclick="exportBackup()">تصدير نسخة احتياطية</button><button class="btn-secondary" onclick="document.getElementById('importFile').click()">استيراد نسخة</button><input id="importFile" class="hidden" type="file" accept=".json,application/json" onchange="importBackup(event)"></div></div>
+ <div class="card"><h2>إعدادات العرض</h2><label style="display:flex;align-items:center;gap:10px"><input id="darkToggle" type="checkbox" onchange="toggleDark()"> الوضع الليلي</label><div class="line"></div><p class="muted">الإصدار 2.0 — يعمل محليًا بدون إنترنت. تصميم وتطوير محمود العطار.</p><button class="btn-secondary" onclick="openPage('faultsPage')" style="width:100%">🧰 فتح دليل الأعطال</button></div>
+</section>
+</main>
+<nav>
+<button class="active" data-page="homePage" onclick="openPage('homePage')">🏠<br>الرئيسية</button>
+<button data-page="filterPage" onclick="goToFirstFilter()">💧<br>الفلاتر</button>
+<button data-page="alertsPage" onclick="openPage('alertsPage')">🔔<br>التنبيهات</button>
+<button data-page="historyPage" onclick="openPage('historyPage')">📋<br>السجل</button>
+<button data-page="toolsPage" onclick="openPage('toolsPage')">⚙️<br>المزيد</button>
+</nav>
+<div id="toast" class="toast"></div>
+<script>
+const KEY='waterFilterTracker_multi_v2';
+const LEGACY_KEY='waterFilterTracker_v1';
+const STAGES7=[
+ ['PP','الشمعة القطنية (PP)',3,'pp-v2.jpg','🧵'],
+ ['GAC','الكربون المحبب (GAC)',6,'gac-v2.jpg','⚫'],
+ ['CTO','الكربون الصلب (CTO)',6,'cto-v2.jpg','⬛'],
+ ['RO','الممبرين (RO)',12,'ro-v2.jpg','💧'],
+ ['POST','البوست كاربون (Post Carbon)',12,'t33-v2.jpg','🔵'],
+ ['MIN','شمعة المعادن (Mineral)',18,'mineral-v2.jpg','🪨'],
+ ['BIO','الأشعة تحت الحمراء / البيوكير',24,'bioceramic-v2.jpg','✨']
+];
+const STAGES5=[
+ ['PP','الشمعة القطنية (PP)',3,'pp-v2.jpg','🧵'],
+ ['GAC','الكربون المحبب (GAC)',6,'gac-v2.jpg','⚫'],
+ ['CTO','الكربون الصلب (CTO)',6,'cto-v2.jpg','⬛'],
+ ['POST','البوست كاربون',12,'t33-v2.jpg','🔵'],
+ ['FINAL','المرحلة النهائية',12,'bioceramic-v2.jpg','💧']
+];
+let data={filters:[],expenses:[],history:[]}, currentFilterId=null, editingStageId=null, toastTimer=null, pendingStagePhoto=null;
+
+function uid(){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function today(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function addMonths(date,months){let d=new Date(date+'T12:00:00');let day=d.getDate();d.setMonth(d.getMonth()+Number(months));if(d.getDate()<day)d.setDate(0);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function daysUntil(date){if(!date)return 99999;let a=new Date(today()+'T00:00:00'),b=new Date(date+'T00:00:00');return Math.round((b-a)/86400000)}
+function fmtDate(s){if(!s)return 'غير محدد';let p=s.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s}
+function money(n){return (Number(n)||0).toLocaleString('ar-EG',{maximumFractionDigits:2})}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function defaults(type){return (type==='5'?STAGES5:STAGES7).map((x,i)=>({id:uid(),code:x[0],name:x[1],durationMonths:x[2],installDate:today(),dueDate:addMonths(today(),x[2]),price:0,labor:0,notes:'',active:true,image:x[3],emoji:x[4]}))}
+function normalizeStage(s,i,type){
+ let base=(type==='5'?STAGES5:STAGES7)[i]||STAGES7[i]||['X','شمعة',6,'','💧'];
+ let install=s.installDate||s.install||s.date||today(), duration=Number(s.durationMonths||s.duration||s.months||base[2]);
+ let oldName=s.name||s.title||base[1];
+ if(oldName==='T33') oldName=type==='5'?'البوست كاربون':'البوست كاربون (Post Carbon)';
+ return {...s,id:s.id||uid(),code:s.code||base[0],name:oldName,durationMonths:duration,installDate:install,dueDate:s.dueDate||addMonths(install,duration),price:Number(s.price)||0,labor:Number(s.labor)||0,purchaseDate:s.purchaseDate||'',model:s.model||'',brand:s.brand||'',supplier:s.supplier||'',installer:s.installer||'',warrantyMonths:Number(s.warrantyMonths)||0,records:Array.isArray(s.records)?s.records:[],notes:s.notes||'',active:s.active!==false,image:s.image||base[3],photo:s.photo||'',emoji:s.emoji||base[4]};
+}
+function load(){
+ try{
+  let raw=localStorage.getItem(KEY);
+  if(raw){let parsed=JSON.parse(raw);if(Array.isArray(parsed))data.filters=parsed;else data={...data,...parsed};}
+  else {
+   let legacy=localStorage.getItem(LEGACY_KEY);
+   if(legacy){let old=JSON.parse(legacy);data.filters=Array.isArray(old)?old:(old.filters||[]);}
+  }
+ }catch(e){data={filters:[],expenses:[],history:[]};}
+ data.filters=(data.filters||[]).map((f,i)=>{let type=String(f.type||f.stages?.length||7)==='5'?'5':'7';let stages=Array.isArray(f.stages)?f.stages.map((s,j)=>normalizeStage(s,j,type)):defaults(type);return {...f,id:f.id||uid(),name:f.name||`فلتر ${i+1}`,type,technician:f.technician||'',phone:f.phone||'',stages,createdAt:f.createdAt||today()};});
+ data.expenses=data.expenses||[];data.history=data.history||[];
+ if(!data.filters.length){data.filters=[{id:uid(),name:'فلتر البيت - 7 مراحل',type:'7',technician:'',phone:'',createdAt:today(),stages:defaults('7')}];}
+ save(false);
+}
+function save(sync=true){localStorage.setItem(KEY,JSON.stringify(data));if(sync)syncSchedule()}
+function syncSchedule(){try{if(window.AndroidBridge&&AndroidBridge.updateSchedule)AndroidBridge.updateSchedule(JSON.stringify(data.filters));}catch(e){}}
+function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.display='none',2600)}
+function openPage(id){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));renderAll();window.scrollTo(0,0)}
+function status(s){let d=daysUntil(s.dueDate);if(d<0)return {cls:'late',label:`متأخرة ${Math.abs(d)} يوم`,kind:'late'};if(d<=2)return {cls:'late',label:d===0?'ميعاد التغيير اليوم':`متبقي ${d} يوم`,kind:'late'};if(d<=7)return {cls:'soon',label:`متبقي ${d} يوم`,kind:'soon'};return {cls:'ok',label:`متبقي ${d} يوم`,kind:'ok'}}
+function allStages(){return data.filters.flatMap(f=>f.stages.map(s=>({...s,filterName:f.name,filterId:f.id})))}
+function renderHome(){
+ let stages=allStages();document.getElementById('countOk').textContent=stages.filter(s=>status(s).kind==='ok').length;document.getElementById('countSoon').textContent=stages.filter(s=>status(s).kind==='soon').length;document.getElementById('countLate').textContent=stages.filter(s=>status(s).kind==='late').length;
+ document.getElementById('filterCards').innerHTML=data.filters.map(f=>`<button class="filter-card" onclick="openFilter('${f.id}')"><span class="emoji">💧</span><strong>${esc(f.name)}</strong><small>${f.type} مراحل · ${f.stages.length} شمعات</small><br><span class="pill ${f.stages.some(s=>daysUntil(s.dueDate)<=2)?'late':'ok'}">${f.stages.filter(s=>daysUntil(s.dueDate)<=2).length?`${f.stages.filter(s=>daysUntil(s.dueDate)<=2).length} محتاجة متابعة`:'الحالة مستقرة'}</span></button>`).join('');
+ let now=new Date(),m=now.getMonth(),y=now.getFullYear();let month=data.expenses.filter(e=>{let d=new Date((e.date||today())+'T12:00:00');return d.getMonth()===m&&d.getFullYear()===y}).reduce((a,e)=>a+Number(e.amount||0),0);let year=data.expenses.filter(e=>(e.date||'').startsWith(String(y))).reduce((a,e)=>a+Number(e.amount||0),0);
+ document.getElementById('monthCost').textContent=money(month);document.getElementById('yearCost').textContent=money(year);
+}
+function openFilter(id){currentFilterId=id;openPage('filterPage')}
+function goToFirstFilter(){if(data.filters.length)openFilter(data.filters[0].id);else showAddFilter()}
+function currentFilter(){return data.filters.find(f=>f.id===currentFilterId)}
+function stageArt(s){let colors={PP:'#e9eef2',GAC:'#252a30',CTO:'#8b969e',RO:'#1686c8',POST:'#d6e2eb',FINAL:'#76b6d7',MIN:'#65b6a1',BIO:'#9c8bd1'};let c=colors[s.code]||'#9bbbd0';let label=String(s.code||'FILTER').replace(/[^A-Z0-9]/g,'').slice(0,8);let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="180" height="240" viewBox="0 0 180 240"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#fff"/><stop offset=".5" stop-color="${c}"/><stop offset="1" stop-color="#fff"/></linearGradient></defs><rect x="58" y="18" width="64" height="22" rx="6" fill="#23618e"/><rect x="47" y="35" width="86" height="170" rx="18" fill="url(#g)" stroke="#8da9bb" stroke-width="3"/><rect x="55" y="48" width="70" height="140" rx="12" fill="${c}" opacity=".25"/><path d="M61 55v125M72 52v130M108 52v130M119 55v125" stroke="#fff" stroke-width="3" opacity=".8"/><rect x="58" y="199" width="64" height="17" rx="5" fill="#23618e"/><text x="90" y="145" font-family="Arial" font-size="19" font-weight="bold" text-anchor="middle" fill="#17486c">${label}</text></svg>`;return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg)}
+function renderFilter(){
+ let f=currentFilter();if(!f)return;document.getElementById('filterHeading').textContent=f.name;
+ let late=f.stages.filter(s=>daysUntil(s.dueDate)<0).length;document.getElementById('filterSummary').innerHTML=`<b>${esc(f.type)} مراحل</b><p class="muted">الفني: ${esc(f.technician||'غير مسجل')} ${f.phone?' · '+esc(f.phone):''}</p><p>عدد الشمعات المتأخرة: <b>${late}</b></p>`;
+ document.getElementById('stageList').innerHTML=f.stages.map((s,i)=>{let st=status(s);let img=`<img src="${s.photo||stageArt(s)}" alt="${esc(s.name)}" onerror="this.style.display='none';this.parentNode.querySelector('.fallback').style.display='block'">`;return `<div class="stage-card"><div class="stage-img">${img}<span class="fallback" style="${'display:none'}">${esc(s.emoji||'💧')}</span></div><div><div class="stage-title">${i+1}. ${esc(s.name)}</div>${s.photo?`<img class="stage-photo" src="${s.photo}" alt="صورة ${esc(s.name)}">`:''}<div class="stage-meta">شراء: ${fmtDate(s.purchaseDate)} · تركيب: ${fmtDate(s.installDate)}<br>النوع: ${esc(s.model||'غير محدد')} · الماركة: ${esc(s.brand||'غير محددة')}<br>المورد: ${esc(s.supplier||'غير مسجل')}<br>الموعد القادم: ${fmtDate(s.dueDate)} · كل ${s.durationMonths} شهر<br>الشراء: ${money(s.price)} ج.م · التركيب: ${money(s.labor)} ج.م<br>عدد مرات التغيير المسجلة: ${(s.records||[]).length}</div><span class="pill ${st.cls}">${st.label}</span><div class="btn-row"><button class="btn-secondary" onclick="editStage('${s.id}')">تعديل البطاقة</button><button class="btn-green" onclick="replaceStage('${s.id}')">تسجيل تغيير جديد</button></div>${(s.records||[]).length?`<details style="margin-top:8px"><summary style="font-size:12px;color:var(--blue);cursor:pointer">📚 تاريخ الشمعة (${s.records.length} تغييرات سابقة)</summary>${s.records.map((r,j)=>`<div class="line"></div><small>نسخة ${j+1}: شراء ${fmtDate(r.purchaseDate)} · تركيب ${fmtDate(r.installDate)}<br>${esc(r.brand)} ${esc(r.model)}<br>المورد: ${esc(r.supplier)} · الفني: ${esc(r.installer)}<br>السعر: ${money(r.price)} ج.م · التركيب: ${money(r.labor)} ج.م${r.photo?`<br><img src="${r.photo}" style="width:90px;height:90px;object-fit:contain;border-radius:9px;background:#eef6fc;margin-top:6px" alt="صورة الشمعة السابقة">`:''}</small>`).join('')}</details>`:''}</div></div>`}).join('');
+}
+function showAddFilter(){currentFilterId=null;document.getElementById('filterForm').reset();document.getElementById('filterFormTitle').textContent='إضافة فلتر جديد';openPage('filterFormPage')}
+function editFilter(){let f=currentFilter();if(!f)return;document.getElementById('fName').value=f.name;document.getElementById('fType').value=f.type;document.getElementById('fTechnician').value=f.technician;document.getElementById('fPhone').value=f.phone;document.getElementById('filterFormTitle').textContent='تعديل بيانات الفلتر';openPage('filterFormPage')}
+document.getElementById('filterForm').addEventListener('submit',e=>{e.preventDefault();let name=document.getElementById('fName').value.trim(),type=document.getElementById('fType').value,technician=document.getElementById('fTechnician').value.trim(),phone=document.getElementById('fPhone').value.trim();if(currentFilterId){let f=currentFilter();if(!f)return;f.name=name;f.technician=technician;f.phone=phone;if(f.type!==type){if(confirm('تغيير نوع الفلتر سيعيد قائمة المراحل الافتراضية. هل تريد الاستمرار؟')){f.type=type;f.stages=defaults(type)}else return}}else{let f={id:uid(),name,type,technician,phone,createdAt:today(),stages:defaults(type)};data.filters.push(f);currentFilterId=f.id}save();toast('تم حفظ بيانات الفلتر');openPage(currentFilterId?'filterPage':'homePage')});
+function resetStagePhotoPreview(src=''){pendingStagePhoto=src||null;let im=document.getElementById('sPhotoPreview');if(src){im.src=src;im.style.display='block'}else{im.removeAttribute('src');im.style.display='none'}document.getElementById('sPhoto').value=''}
+function compressStagePhoto(file){return new Promise((resolve,reject)=>{let reader=new FileReader();reader.onerror=reject;reader.onload=()=>{let img=new Image();img.onerror=reject;img.onload=()=>{let scale=Math.min(1,900/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);let ctx=c.getContext('2d');ctx.drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',0.76))};img.src=reader.result};reader.readAsDataURL(file)})}
+document.getElementById('sPhoto').addEventListener('change',async e=>{let file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){toast('اختار صورة فقط');return}try{pendingStagePhoto=await compressStagePhoto(file);let im=document.getElementById('sPhotoPreview');im.src=pendingStagePhoto;im.style.display='block';toast('الصورة جاهزة للحفظ')}catch(err){toast('تعذر قراءة الصورة')}});
+function editStage(id){let f=currentFilter();if(!f)return;let s=f.stages.find(x=>x.id===id);if(!s)return;editingStageId=id;pendingStagePhoto=s.photo||'';[['sName',s.name],['sPurchaseDate',s.purchaseDate||''],['sInstall',s.installDate],['sModel',s.model||''],['sBrand',s.brand||''],['sDuration',s.durationMonths],['sPrice',s.price||0],['sLabor',s.labor||0],['sSupplier',s.supplier||''],['sInstaller',s.installer||''],['sWarranty',s.warrantyMonths||0],['sNotes',s.notes||'']].forEach(([id,v])=>document.getElementById(id).value=v);openPage('stageFormPage');resetStagePhotoPreview(s.photo||'')}
+document.getElementById('stageForm').addEventListener('submit',e=>{e.preventDefault();let f=currentFilter(),s=f?.stages.find(x=>x.id===editingStageId);if(!s)return;let oldDue=s.dueDate;s.name=document.getElementById('sName').value.trim();s.purchaseDate=document.getElementById('sPurchaseDate').value;s.installDate=document.getElementById('sInstall').value;s.model=document.getElementById('sModel').value.trim();s.brand=document.getElementById('sBrand').value.trim();s.durationMonths=Number(document.getElementById('sDuration').value);s.dueDate=addMonths(s.installDate,s.durationMonths);s.price=Number(document.getElementById('sPrice').value)||0;s.labor=Number(document.getElementById('sLabor').value)||0;s.supplier=document.getElementById('sSupplier').value.trim();s.installer=document.getElementById('sInstaller').value.trim();s.warrantyMonths=Number(document.getElementById('sWarranty').value)||0;s.notes=document.getElementById('sNotes').value.trim();s.photo=pendingStagePhoto||'';data.history.unshift({id:uid(),date:today(),filterId:f.id,filterName:f.name,stageId:s.id,stageName:s.name,action:'تحديث بطاقة الشمعة',details:`شراء ${fmtDate(s.purchaseDate)} · تركيب ${fmtDate(s.installDate)} · ${s.brand} ${s.model} · المورد ${s.supplier} · الموعد السابق ${fmtDate(oldDue)} والجديد ${fmtDate(s.dueDate)}`,amount:0});save();toast('اتحفظت بطاقة الشمعة');openPage('filterPage')});
+function replaceStage(id){let f=currentFilter(),s=f?.stages.find(x=>x.id===id);if(!s)return;let purchaseDate=prompt('تاريخ شراء الشمعة الجديدة (YYYY-MM-DD)',today());if(purchaseDate===null)return;let price=Number(prompt('سعر الشمعة الجديدة بالجنيه','0')||0);let model=prompt('نوع / موديل الشمعة الجديدة',s.model||'')??s.model;let brand=prompt('الماركة / الشركة',s.brand||'')??s.brand;let supplier=prompt('اسم المحل أو المورد',s.supplier||'')??s.supplier;let installer=prompt('مين ركّب الشمعة؟',s.installer||'')??s.installer;let labor=Number(prompt('تكلفة التركيب بالجنيه','0')||0);let installDate=today();s.records=s.records||[];s.records.unshift({id:uid(),purchaseDate:s.purchaseDate||'',installDate:s.installDate,model:s.model||'',brand:s.brand||'',supplier:s.supplier||'',installer:s.installer||'',price:Number(s.price)||0,labor:Number(s.labor)||0,dueDate:s.dueDate,changedAt:today(),photo:s.photo||''});s.photo='';s.purchaseDate=purchaseDate;s.installDate=installDate;s.price=price;s.model=model;s.brand=brand;s.supplier=supplier;s.installer=installer;s.labor=labor;s.dueDate=addMonths(installDate,s.durationMonths);data.history.unshift({id:uid(),date:installDate,filterId:f.id,filterName:f.name,stageId:s.id,stageName:s.name,action:'تغيير شمعة',details:`شراء ${fmtDate(purchaseDate)} · تركيب ${fmtDate(installDate)} · ${brand} ${model} · المورد ${supplier} · الفني ${installer} · الموعد القادم ${fmtDate(s.dueDate)}`,amount:price+labor});if(price+labor>0)data.expenses.unshift({id:uid(),desc:`شراء وتركيب ${s.name} - ${f.name}`,amount:price+labor,date:installDate,filterId:f.id});save();toast('اتسجلت الشمعة القديمة والجديدة بالتفاصيل');renderAll()}
+function logFilterService(){let f=currentFilter();if(!f)return;let desc=prompt('اكتب وصف الصيانة');if(!desc)return;let amount=Number(prompt('التكلفة بالجنيه','0')||0);data.history.unshift({id:uid(),date:today(),filterId:f.id,filterName:f.name,action:'صيانة',details:desc,amount});if(amount>0)data.expenses.unshift({id:uid(),desc,amount,date:today(),filterId:f.id});save();toast('تم تسجيل الصيانة');renderAll()}
+function deleteFilter(){let f=currentFilter();if(!f||!confirm(`حذف ${f.name}؟ سيتم حذف الفلتر من القائمة، لكن سجل الصيانة والمصاريف التاريخي سيبقى.`))return;data.filters=data.filters.filter(x=>x.id!==f.id);currentFilterId=null;save();openPage('homePage')}
+function renderAlerts(){let a=allStages().map(s=>({...s,d:daysUntil(s.dueDate)})).sort((x,y)=>x.d-y.d);document.getElementById('alertsList').innerHTML=a.length?a.map(s=>`<div class="list-item" style="padding:11px;margin:8px 0"><b>${esc(s.name)}</b><div class="muted">${esc(s.filterName)} · ${fmtDate(s.dueDate)}</div><span class="pill ${status(s).cls}">${status(s).label}</span></div>`).join(''):'<div class="empty">لا توجد مواعيد مسجلة</div>';try{if(window.AndroidBridge)document.getElementById('notifyToggle').checked=AndroidBridge.getNotificationsEnabled()}catch(e){}}
+function toggleNotifications(on){try{if(window.AndroidBridge)AndroidBridge.setNotificationsEnabled(on);toast(on?'تم تفعيل الإشعارات':'تم إيقاف الإشعارات')}catch(e){toast('تعذر تغيير الإعداد')}}
+function testNotification(){try{if(window.AndroidBridge)AndroidBridge.testNotification();else toast('تجربة الإشعار متاحة داخل تطبيق أندرويد')}catch(e){toast('راجع صلاحيات الإشعارات في الهاتف')}}
+function openExactAlarmSettings(){try{if(window.AndroidBridge)AndroidBridge.openExactAlarmSettings();else toast('الميزة متاحة داخل تطبيق أندرويد')}catch(e){toast('افتح إعدادات التطبيق في الهاتف')}}
+function renderExpenses(){document.getElementById('eFilter').innerHTML='<option value="">بدون تحديد</option>'+data.filters.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('');document.getElementById('expensesList').innerHTML=data.expenses.length?data.expenses.map(e=>`<div class="list-item" style="padding:11px;margin:8px 0"><b>${esc(e.desc)}</b><div class="muted">${fmtDate(e.date)} · ${money(e.amount)} ج.م</div><button class="btn-danger" style="margin-top:8px;padding:6px 10px" onclick="deleteExpense('${e.id}')">حذف</button></div>`).join(''):'<div class="empty">لسه مفيش مصروفات مسجلة</div>';if(!document.getElementById('eDate').value)document.getElementById('eDate').value=today()}
+document.getElementById('expenseForm').addEventListener('submit',e=>{e.preventDefault();data.expenses.unshift({id:uid(),desc:document.getElementById('eDesc').value.trim(),amount:Number(document.getElementById('eAmount').value),date:document.getElementById('eDate').value,filterId:document.getElementById('eFilter').value});save();e.target.reset();document.getElementById('eDate').value=today();toast('تم تسجيل المصروف');renderAll()});
+function deleteExpense(id){if(!confirm('حذف المصروف؟'))return;data.expenses=data.expenses.filter(e=>e.id!==id);save();renderAll()}
+function renderHistory(){document.getElementById('historyList').innerHTML=data.history.length?data.history.map(h=>`<div class="list-item" style="padding:11px;margin:8px 0"><b>${esc(h.action)} — ${esc(h.stageName||h.filterName||'فلتر')}</b><div class="muted">${fmtDate(h.date)} · ${esc(h.filterName||'')}</div><div>${esc(h.details||'')}</div>${h.amount?`<div class="muted">التكلفة: ${money(h.amount)} ج.م</div>`:''}</div>`).join(''):'<div class="empty">سجل الصيانة هيظهر هنا بعد تسجيل أول عملية</div>'}
+const faults=[
+ ['ضعف تدفق المياه','تأكد إن محبس المياه مفتوح، وإن الخرطوم غير مثني. افحص موعد تغيير الشمعات وضغط المصدر. لو استمر الضعف، اطلب فنيًا لفحص المضخة والممبرين.'],
+ ['تسريب مياه','اقفل محبس تغذية الفلتر فورًا وافصل الكهرباء عن المضخة بيد جافة ومن مكان آمن. لا تشغّل الجهاز مع وجود تسريب؛ اطلب فنيًا لفحص الوصلات والجوانات.'],
+ ['طعم أو رائحة غير معتادة','تأكد من تركيب الشمعات بشكل صحيح ومن موعد تغييرها، واتبع تعليمات الشركة للشطف. لو استمرت المشكلة، أوقف شرب المياه لحين فحص المصدر والفلتر.'],
+ ['المضخة لا تعمل','تأكد من مصدر الكهرباء والمحول والمحابس بدون فتح أجزاء كهربائية. افصل الكهرباء قبل أي فحص، واستعن بفني لو استمرت المشكلة.'],
+ ['المياه لا تتوقف عن التصريف','قد تكون المشكلة في صمام الإغلاق أو الضغط أو الممبرين. لا تفك أجزاء الضغط بنفسك؛ اطلب فني صيانة.']
+];
+function renderFaults(){document.getElementById('faultsList').innerHTML=faults.map((f,i)=>`<div class="card"><h2>${i+1}. ${f[0]}</h2><p style="line-height:1.8;font-size:13px">${f[1]}</p></div>`).join('')}
+function exportBackup(){let blob=new Blob([JSON.stringify({app:'water-filter-tracker',version:2,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='نسخة-فلتر-المياه-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('تم تجهيز النسخة الاحتياطية')}
+function importBackup(ev){let file=ev.target.files?.[0];if(!file)return;let reader=new FileReader();reader.onload=()=>{try{let parsed=JSON.parse(reader.result),incoming=parsed.data||parsed;if(!Array.isArray(incoming.filters))throw new Error('bad');if(!confirm('استيراد النسخة سيستبدل البيانات الحالية. يفضل تصدير نسخة قبل المتابعة. هل تريد الاستمرار؟'))return;data={filters:incoming.filters||[],expenses:incoming.expenses||[],history:incoming.history||[]};data.filters=data.filters.map((f,i)=>({...f,id:f.id||uid(),stages:(f.stages||[]).map((s,j)=>normalizeStage(s,j,String(f.type)==='5'?'5':'7'))}));save();toast('تم استيراد النسخة بنجاح');openPage('homePage')}catch(e){toast('الملف غير صالح أو غير متوافق')}ev.target.value=''};reader.readAsText(file)}
+function toggleDark(){document.body.classList.toggle('dark');document.getElementById('darkToggle').checked=document.body.classList.contains('dark');localStorage.setItem('waterFilterDark',document.body.classList.contains('dark')?'1':'0')}
+function renderAll(){renderHome();if(!document.getElementById('filterPage').classList.contains('hidden'))renderFilter();renderAlerts();renderExpenses();renderHistory();renderFaults()}
+function migrateLegacyNames(){data.filters.forEach(f=>{f.stages.forEach(s=>{if(/T33/i.test(s.name)){s.name=f.type==='5'?'البوست كاربون':'البوست كاربون (Post Carbon)'};if(/Post Carbon/i.test(s.name)&&f.type==='7'&&s.code==='BIO'){s.name='الأشعة تحت الحمراء / البيوكير'}})})}
+load();migrateLegacyNames();if(localStorage.getItem('waterFilterDark')==='1')document.body.classList.add('dark');document.getElementById('eDate').value=today();save();renderAll();
+</script>
+</body>
+</html>
